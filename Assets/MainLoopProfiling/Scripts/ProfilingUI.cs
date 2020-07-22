@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using UnityEngine.Profiling;
-using UnityEngine.Experimental.PlayerLoop;
+
 using System.Text;
 
 namespace UTJ
@@ -134,14 +134,14 @@ namespace UTJ
         private void UpdateMainThreadMeter()
         {
             float allTime = CustomPlayerLoop.GetLastExecuteTime();
-            float scriptUpdateTime = CustomPlayerLoop.GetProfilingTime<Update.ScriptRunBehaviourUpdate>() +
-                CustomPlayerLoop.GetProfilingTime<PreLateUpdate.ScriptRunBehaviourLateUpdate>() +
-                CustomPlayerLoop.GetProfilingTime<FixedUpdate.ScriptRunBehaviourFixedUpdate>() +
-                CustomPlayerLoop.GetProfilingTime<Update.ScriptRunDelayedDynamicFrameRate>();
-            float animatorTime = CustomPlayerLoop.GetProfilingTime<PreLateUpdate.DirectorUpdateAnimationBegin>() +
-                CustomPlayerLoop.GetProfilingTime<PreLateUpdate.DirectorUpdateAnimationEnd>();
-            float renderTime = CustomPlayerLoop.GetProfilingTime<PostLateUpdate.FinishFrameRendering>();
-            float physicsTime = CustomPlayerLoop.GetProfilingTime<FixedUpdate.PhysicsFixedUpdate>();
+            float scriptUpdateTime = CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.Update.ScriptRunBehaviourUpdate>() +
+                CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.PreLateUpdate.ScriptRunBehaviourLateUpdate>() +
+                CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.FixedUpdate.ScriptRunBehaviourFixedUpdate>() +
+                CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.Update.ScriptRunDelayedDynamicFrameRate>();
+            float animatorTime = CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.PreLateUpdate.DirectorUpdateAnimationBegin>() +
+                CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.PreLateUpdate.DirectorUpdateAnimationEnd>();
+            float renderTime = CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.PostLateUpdate.FinishFrameRendering>();
+            float physicsTime = CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.FixedUpdate.PhysicsFixedUpdate>();
             // for android multiThread
 #if UNITY_ANDROID && !UNITY_EDITOR
             if (SystemInfo.graphicsMultiThreaded)
@@ -173,7 +173,7 @@ namespace UTJ
                 recordCamerRender = Recorder.Get("Camera.Render");
             }
             float cameraRenderTime = recordCamerRender.elapsedNanoseconds * 0.000000001f;
-            float mainThreadTime = CustomPlayerLoop.GetProfilingTime<PostLateUpdate.FinishFrameRendering>();
+            float mainThreadTime = CustomPlayerLoop.GetProfilingTime<UnityEngine.PlayerLoop.PostLateUpdate.FinishFrameRendering>();
 #if UNITY_ANDROID && !UNITY_EDITOR
             float waitForGfxPresent = CustomPlayerLoop.GetGfxWaitForPresent();
             mainThreadTime -= waitForGfxPresent;

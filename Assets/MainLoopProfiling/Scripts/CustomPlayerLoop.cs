@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.LowLevel;
+
 using UnityEngine.Profiling;
-using UnityEngine.Experimental.PlayerLoop;
+
 
 
 // プレイヤーループのカスタマイズ
@@ -61,31 +61,31 @@ namespace UTJ
         {
             System.Type[] profilePoints = {
                 // script
-                typeof( Update.ScriptRunBehaviourUpdate),
-                typeof( PreLateUpdate.ScriptRunBehaviourLateUpdate),
-                typeof( FixedUpdate.ScriptRunBehaviourFixedUpdate),
+                typeof( UnityEngine.PlayerLoop.Update.ScriptRunBehaviourUpdate),
+                typeof( UnityEngine.PlayerLoop.PreLateUpdate.ScriptRunBehaviourLateUpdate),
+                typeof( UnityEngine.PlayerLoop.FixedUpdate.ScriptRunBehaviourFixedUpdate),
                 // script (Coroutine)
-                typeof( Update.ScriptRunDelayedDynamicFrameRate),
+                typeof( UnityEngine.PlayerLoop.Update.ScriptRunDelayedDynamicFrameRate),
                 // Animator
-                typeof(PreLateUpdate.DirectorUpdateAnimationBegin),
-                typeof(PreLateUpdate.DirectorUpdateAnimationEnd),
+                typeof(UnityEngine.PlayerLoop.PreLateUpdate.DirectorUpdateAnimationBegin),
+                typeof(UnityEngine.PlayerLoop.PreLateUpdate.DirectorUpdateAnimationEnd),
                 // Renderer
-                typeof(PostLateUpdate.UpdateAllRenderers),
-                typeof(PostLateUpdate.UpdateAllSkinnedMeshes),
+                typeof(UnityEngine.PlayerLoop.PostLateUpdate.UpdateAllRenderers),
+                typeof(UnityEngine.PlayerLoop.PostLateUpdate.UpdateAllSkinnedMeshes),
                 // Rendering(require)
-                typeof(PostLateUpdate.FinishFrameRendering),
+                typeof(UnityEngine.PlayerLoop.PostLateUpdate.FinishFrameRendering),
                 // Physics
-                typeof( FixedUpdate.PhysicsFixedUpdate),
+                typeof( UnityEngine.PlayerLoop.FixedUpdate.PhysicsFixedUpdate),
             };
 
 #if UNITY_2019_3_OR_NEWER
-            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+            var playerLoop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
 #else
             var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
 #endif
 
             AppendProfilingLoopSystem(ref playerLoop, profilePoints);
-            PlayerLoop.SetPlayerLoop(playerLoop);
+            UnityEngine.LowLevel.PlayerLoop.SetPlayerLoop(playerLoop);
         }
 
         public static float GetLastExecuteTime()
@@ -120,7 +120,7 @@ namespace UTJ
             return 0.0f;
         }
 
-        private static void AppendProfilingLoopSystem(ref PlayerLoopSystem playerLoop, System.Type[] profilePoints)
+        private static void AppendProfilingLoopSystem(ref UnityEngine.LowLevel.PlayerLoopSystem playerLoop, System.Type[] profilePoints)
         {
             profilingSubSystem = new Dictionary<System.Type, ProfilingUpdate>();
             prevSubSystemExecuteTime = new Dictionary<System.Type, float>();
@@ -132,7 +132,7 @@ namespace UTJ
             }
 
             // FinishRendering is required point.
-            System.Type finishRenderingType = typeof(PostLateUpdate.FinishFrameRendering);
+            System.Type finishRenderingType = typeof(UnityEngine.PlayerLoop.PostLateUpdate.FinishFrameRendering);
             if (!profilingSubSystem.ContainsKey(finishRenderingType))
             {
                 profilingSubSystem.Add(finishRenderingType, new ProfilingUpdate());
@@ -141,7 +141,7 @@ namespace UTJ
 
 
             // Note: this also resets the loop to its defalt state first.        
-            var newSystems = new List<PlayerLoopSystem>();
+            var newSystems = new List<UnityEngine.LowLevel.PlayerLoopSystem>();
             for (int i = 0; i < playerLoop.subSystemList.Length; ++i)
             {
                 var subSystem = playerLoop.subSystemList[i];
@@ -149,7 +149,7 @@ namespace UTJ
                 newSystems.Clear();
                 if (i == 0)
                 {
-                    newSystems.Add(new PlayerLoopSystem
+                    newSystems.Add(new UnityEngine.LowLevel.PlayerLoopSystem
                     {
                         updateDelegate = Loop1stPoint
                     });
@@ -161,13 +161,13 @@ namespace UTJ
                     if (profilingSubSystem.TryGetValue(subsub.type, out updateObj))
                     {
                         // SamplingStart - Exec - SamplingEnd
-                        newSystems.Add(new PlayerLoopSystem
+                        newSystems.Add(new UnityEngine.LowLevel.PlayerLoopSystem
                         {
                             type = typeof(ProfilingUpdate),
                             updateDelegate = updateObj.Start
                         });
                         newSystems.Add(subsub);
-                        newSystems.Add(new PlayerLoopSystem
+                        newSystems.Add(new UnityEngine.LowLevel.PlayerLoopSystem
                         {
                             type = typeof(ProfilingUpdate),
                             updateDelegate = updateObj.End
@@ -181,7 +181,7 @@ namespace UTJ
 
                 if (i == playerLoop.subSystemList.Length - 1)
                 {
-                    newSystems.Add(new PlayerLoopSystem
+                    newSystems.Add(new UnityEngine.LowLevel.PlayerLoopSystem
                     {
                         updateDelegate = LoopLastPoint
                     });
@@ -197,7 +197,7 @@ namespace UTJ
 
         private static void LoopLastPoint()
         {
-            var finishRenderProfiling = profilingSubSystem[typeof(PostLateUpdate.FinishFrameRendering)];
+            var finishRenderProfiling = profilingSubSystem[typeof(UnityEngine.PlayerLoop.PostLateUpdate.FinishFrameRendering)];
             // get finish render profiling time to exclude profiler execute time .
             float endTime = finishRenderProfiling.GetEndTime();
             foreach (var kv in profilingSubSystem)
