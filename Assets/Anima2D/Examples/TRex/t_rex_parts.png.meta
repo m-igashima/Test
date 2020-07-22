@@ -121,12 +121,12 @@ TextureImporter:
       name: t_rex_head
       rect:
         serializedVersion: 2
-        x: 238.13739
-        y: 546.58777
-        width: 179.91223
-        height: 120.64136
+        x: 232.77478
+        y: 540.67554
+        width: 190
+        height: 131
       alignment: 9
-      pivot: {x: 0.123487204, y: 0.3012029}
+      pivot: {x: 0.1451551, y: 0.32251722}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -188,6 +188,6 @@ TextureImporter:
   spritePackingTag: trex
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
-  userData: 97018622002239
+  userData: 637309269498077446
   assetBundleName: 
   assetBundleVariant: 

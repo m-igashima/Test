@@ -1244,9 +1244,9 @@ namespace Anima2D
 		
 		override protected void DoToolbarGUI()
 		{
-			EditorGUILayout.BeginHorizontal();
-			
-			EditorGUI.BeginDisabledGroup(m_SpriteMeshCache.spriteMesh == null);
+            EditorGUI.BeginDisabledGroup(m_SpriteMeshCache.spriteMesh == null);
+
+            EditorGUILayout.BeginHorizontal();
 			
 			showBones = GUILayout.Toggle(showBones, s_Styles.showBonesIcon, EditorStyles.toolbarButton,GUILayout.Width(32));
 			showTriangles = true;
