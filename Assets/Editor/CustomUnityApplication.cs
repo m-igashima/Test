@@ -30,8 +30,6 @@ public static class CustomUnityApplication
         };
     }
 
-
-
     private static string GetFullPath(string assetPath)
     {
         return Application.dataPath.Replace("/Assets", "/" + assetPath);
