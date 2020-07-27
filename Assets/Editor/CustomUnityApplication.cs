@@ -8,6 +8,7 @@ public static class CustomUnityApplication
     [InitializeOnLoadMethod]
     static void Start()
     {
+#if false
         Selection.selectionChanged += () =>
         {
             if (Selection.activeObject != null)
@@ -28,6 +29,7 @@ public static class CustomUnityApplication
                 }
             }
         };
+#endif
     }
 
     private static string GetFullPath(string assetPath)
