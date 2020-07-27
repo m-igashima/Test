@@ -54,8 +54,97 @@ namespace Anima2D
 			return num * (float)((Vector3.Dot(axis, Vector3.Cross(dirA, dirB)) >= 0f) ? 1 : -1);
 		}
 
-		public static void OnSceneGUI(SceneView sceneview)
+        private static Dictionary<int, int> controllerIDs = new Dictionary<int, int>();
+        private static Dictionary<int, int> boneMoveControllerIDs = new Dictionary<int, int>();
+        private static Dictionary<int, int> boneRotControllerIDs = new Dictionary<int, int>();
+        public static void OnSceneGUI(SceneView sceneview)
 		{
+            List<Ik2D> iks = EditorExtra.FindComponentsOfType<Ik2D>().ToList();
+            for (int i = 0; i < iks.Count; i++)
+            {
+                int controllerKey = iks[i].gameObject.GetInstanceID();
+                if (!controllerIDs.ContainsKey(controllerKey))
+                {
+                    // ControlId‚ðŠ„‚èU‚é
+                    controllerIDs[controllerKey] = GUIUtility.GetControlID(FocusType.Passive);
+                }
+                EditorGUI.BeginChangeCheck();
+#if true
+                Vector3 pos = Handles.FreeMoveHandle(controllerIDs[controllerKey],
+                    iks[i].transform.position,
+                    iks[i].transform.rotation,
+                    UnityReflections.AnnotationUtility.Gizmos3DIconSize * 0.5f,
+                    Vector3.one,
+                    Handles.CircleHandleCap
+                );
+
+#else
+                Vector3 pos = iks[i].transform.position;
+                Handles.SphereHandleCap(
+                    controllerIDs[controllerKey],
+                    iks[i].transform.position,
+                    iks[i].transform.rotation,
+                    1.0f,
+                    EventType.Repaint);
+#endif
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(iks[i].transform, "IK");
+                    iks[i].transform.position = pos;
+                    EditorUpdater.SetDirty("IK");
+                }
+            }
+
+            for (int i = 0; i < s_Bones.Count; i++)
+            {
+                Bone2D bone = s_Bones[i];
+                if (bone && IsVisible(bone))
+                {
+                    Color color = Handles.color;
+                    int key = bone.gameObject.GetInstanceID();
+                    if (!boneMoveControllerIDs.ContainsKey(key))
+                    {
+                        boneMoveControllerIDs[key] = GUIUtility.GetControlID(FocusType.Passive);
+                    }
+                    if (!boneRotControllerIDs.ContainsKey(key))
+                    {
+                        boneRotControllerIDs[key] = GUIUtility.GetControlID(FocusType.Passive);
+                    }
+                    Handles.color = bone.color;
+                    EditorGUI.BeginChangeCheck();
+                    Vector3 pos = Handles.FreeMoveHandle(boneMoveControllerIDs[key],
+                        bone.transform.position,
+                        bone.transform.rotation,
+                        UnityReflections.AnnotationUtility.Gizmos3DIconSize * 0.2f,
+                        Vector3.one,
+                        Handles.RectangleHandleCap
+                    );
+                    Quaternion rot = Handles.Disc(boneRotControllerIDs[key],
+                        bone.transform.rotation,
+                        bone.transform.position,
+                        Vector3.forward,
+                        UnityReflections.AnnotationUtility.Gizmos3DIconSize * 0.3f,
+                        false,
+                        1.0f
+                    );
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(bone.transform, "Move");
+
+                        bone.transform.position = pos;
+                        bone.transform.rotation = rot;
+
+                        BoneUtils.OrientToChild(bone.parentBone, Event.current.shift, Undo.GetCurrentGroupName(), true);
+
+                        EditorUtility.SetDirty(bone.transform);
+
+                        EditorUpdater.SetDirty("Move");
+                    }
+                    Handles.color = color;
+                }
+            }
+
 			for (int i = 0; i < s_Bones.Count; i++)
 			{
 				Bone2D bone = s_Bones[i];
@@ -67,7 +156,7 @@ namespace Anima2D
 
 					if(!IsLocked(bone))
 					{
-						if(eventType == EventType.MouseDown)
+                        if (eventType == EventType.MouseDown)
 						{
 							if(HandleUtility.nearestControl == controlID &&
 							   Event.current.button == 0)
